@@ -44,7 +44,7 @@ function AuthProvider({ children }: AuthProviderData) {
 
       const REDIRECT_URI = makeRedirectUri({useProxy: true});
       const RESPONSE_TYPE = 'token';
-      const SCOPE = ['openid', 'user:read:email', 'user:read:follows'];
+      const SCOPE = encodeURI("openid user:read:email user:read:follows");
       const FORCE_VERIFY = true;
       const STATE = generateRandom(30);
 
@@ -59,7 +59,7 @@ function AuthProvider({ children }: AuthProviderData) {
       const response = await startAsync({authUrl});
 
       if(response.type === 'success' && response.params.error !== 'access_denied'){
-        if(response.params.state !== 'STATE'){
+        if(response.params.state !== STATE){
           throw new Error("Invalid state value");
         }
 
@@ -68,7 +68,6 @@ function AuthProvider({ children }: AuthProviderData) {
         const userResponse = await api.get('/users');
 
         setUser(userResponse.data.data[0]);
-        console.log(user);
 
         setUserToken(response.params.access_token);
       }
@@ -99,7 +98,6 @@ function AuthProvider({ children }: AuthProviderData) {
   }
 
   useEffect(() => {
-    // add client_id to request's "Client-Id" header
     api.defaults.headers.common['Client-Id'] = CLIENT_ID!;
   }, [])
 
